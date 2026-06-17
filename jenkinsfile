@@ -35,7 +35,7 @@ pipeline {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
                             sudo mv foodhub /var/www/html/ &&
-                           sudo systemctl restart nginx&&
+                           sudo systemctl restart nginx &&
                         '
                     """
                 }
