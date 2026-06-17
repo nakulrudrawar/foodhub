@@ -34,8 +34,9 @@ pipeline {
                 sshagent([SSH_CREDENTIAL]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
-                            sudo mv foodhub /var/www/html/ &&
-                           sudo systemctl restart nginx &&
+                            sudo mkdir -p /var/www/html &&
+                            sudo cp -r ${REMOTE_PATH}/* /var/www/html/ &&
+                            sudo systemctl restart nginx
                         '
                     """
                 }
