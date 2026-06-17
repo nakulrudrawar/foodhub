@@ -7,7 +7,7 @@ pipeline {
         REPO_URL       = 'https://github.com/nakulrudrawar/foodhub.git'
         BRANCH         = 'main'
         REMOTE_USER    = 'ubuntu'
-        REMOTE_PATH    = '/home/ubuntu/var/www/foodhub'
+        REMOTE_PATH    = '/home/ubuntu/var/www/html/foodhub'
     }
     
     
