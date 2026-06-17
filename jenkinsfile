@@ -2,41 +2,52 @@ pipeline {
     agent any
 
     environment {
-        SSH_CRED = 'node-pipeline-key'
-        SERVER_IP = '172.31.13.206'
-        REMOTE_USER = 'ubuntu'
-        APP_DIR = '/home/ubuntu/var/www/html/foodhub'
+        SERVER_IP      = '172.31.18.45'
+        SSH_CREDENTIAL = 'node-pipeline-key'
+        REPO_URL       = 'https://github.com/nakulrudrawar/foodhub.git'
+        BRANCH         = 'main'
+        REMOTE_USER    = 'ubuntu'
+        REMOTE_PATH    = '/home/ubuntu/var/www/foodhub'
     }
-
+    
+    
     stages {
-        stage('Clone Repo') {
+        stage('Clone Repository') {
             steps {
-                git url: 'https://github.com/nakulrudrawar/foodhub.git', branch: 'main'
+                git branch: "${BRANCH}", url: "${REPO_URL}"
             }
         }
 
-        stage('Deploy to Server') {
+        stage('Upload Files to target-server') {
             steps {
-                sshagent(credentials: ["${SSH_CRED}"]) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} "mkdir -p ${APP_DIR}"
-                        scp -r * ${REMOTE_USER}@${SERVER_IP}:${APP_DIR}/
-                    '''
+                sshagent([SSH_CREDENTIAL]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} 'mkdir -p ${REMOTE_PATH}'
+                        scp -o StrictHostKeyChecking=no -r * ${REMOTE_USER}@${SERVER_IP}:${REMOTE_PATH}/
+                    """
                 }
             }
         }
 
-        stage('Install & Run App') {
+        stage('Install Dependencies & Start App on the target server') {
             steps {
-                sshagent(["${SSH_CRED}"]) {
+                sshagent([SSH_CREDENTIAL]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
-                            sudo apt update &&
-                            sudo systemctl restart nginx
+                           sudo systemctl status nginx&&
                         '
                     """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Application deployed successfully!'
+        }
+        failure {
+            echo '❌ Deployment failed.'
         }
     }
 }
